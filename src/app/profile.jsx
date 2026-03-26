@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import { Colors, Typography, CommonStyles } from "../shared/theme";
 
-export default function HubScreen() {
+export default function ProfileScreen() {
   return (
     <View style={CommonStyles.screenPadded}>
       <View style={CommonStyles.appHeader}>
@@ -11,10 +11,10 @@ export default function HubScreen() {
 
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ ...Typography.pageTitle, color: Colors.textPrimary }}>
-          Hub
+          Profile
         </Text>
         <Text style={{ ...Typography.body, color: Colors.textSecondary, marginTop: 8 }}>
-          Globe & Time Machine
+          Settings & Preferences
         </Text>
       </View>
     </View>
