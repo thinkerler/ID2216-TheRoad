@@ -34,9 +34,8 @@ export const CommonStyles = {
     borderRadius: BorderRadius.xxl,
     borderWidth: BorderWidth.thin,
     borderColor: Colors.borderSubtle,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    marginHorizontal: Spacing.screenHorizontal,
     marginTop: Spacing.sm,
   },
 

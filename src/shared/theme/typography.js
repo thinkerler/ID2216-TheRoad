@@ -17,9 +17,9 @@
 export const Typography = {
 
   appTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '600',
-    lineHeight: 26,
+    lineHeight: 22,
   },
 
   pageTitle: {
