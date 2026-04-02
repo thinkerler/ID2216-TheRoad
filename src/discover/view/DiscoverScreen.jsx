@@ -4,9 +4,9 @@ import { observer } from 'mobx-react-lite';
 import { Colors } from '../../shared/theme/colors';
 import { StatusOverlay } from '../../shared/ui/StatusOverlay';
 import { DiscoverPresenter } from '../presenter/DiscoverPresenter';
-import { SearchBar } from './SearchBar';
-import { InsightsCard } from './InsightsCard';
-import { DestinationList } from './DestinationList';
+import { FeaturedRecommendationCarousel } from './FeaturedRecommendationCarousel';
+import { CommunityInsightsSection } from './CommunityInsightsSection';
+import { PlaceDetailModal } from './PlaceDetailModal';
 
 /**
  * DiscoverScreen — primary View for Discover tab.
@@ -24,9 +24,12 @@ export const DiscoverScreen = observer(function DiscoverScreen() {
 
   const loadStatus = DiscoverPresenter.getLoadStatus();
   const errorMessage = DiscoverPresenter.getErrorMessage();
-  const searchQuery = DiscoverPresenter.getSearchQuery();
-  const insights = DiscoverPresenter.getInsights();
-  const destinations = DiscoverPresenter.getDestinations();
+  const topPicks = DiscoverPresenter.getTopPicks();
+  const communityInsights = DiscoverPresenter.getCommunityInsights();
+  const wishToggleStatus = DiscoverPresenter.getWishToggleStatus();
+  const selectedPlace = DiscoverPresenter.getSelectedPlace();
+  const placeDetail = DiscoverPresenter.getPlaceDetail();
+  const detailStatus = DiscoverPresenter.getDetailStatus();
 
   return (
     <View style={styles.screen}>
@@ -36,7 +39,6 @@ export const DiscoverScreen = observer(function DiscoverScreen() {
         </Text>
         <Text style={styles.headerSubtitle}>All the World's a Road</Text>
       </View>
-
       <StatusOverlay
         status={loadStatus}
         errorMessage={errorMessage}
@@ -46,16 +48,27 @@ export const DiscoverScreen = observer(function DiscoverScreen() {
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
         >
-          <Text style={styles.pageTitle}>Discover</Text>
-          <SearchBar
-            value={searchQuery}
-            onChangeText={(text) => DiscoverPresenter.onSearchChange(text)}
+          <FeaturedRecommendationCarousel
+            places={topPicks}
+            onLike={(place) => DiscoverPresenter.onToggleWishlist(place)}
+            onUnlike={(place) => DiscoverPresenter.onUnlikePlace(place)}
+            toggleStatus={wishToggleStatus}
           />
-          <InsightsCard insights={insights} />
-          <DestinationList destinations={destinations} />
+          <CommunityInsightsSection
+            items={communityInsights}
+            onPress={(place) => DiscoverPresenter.onPlacePress(place)}
+          />
         </ScrollView>
       </StatusOverlay>
+
+      <PlaceDetailModal
+        place={selectedPlace}
+        detail={placeDetail}
+        detailStatus={detailStatus}
+        onClose={() => DiscoverPresenter.onCloseDetail()}
+      />
     </View>
   );
 });
@@ -90,13 +103,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 32,
-  },
-  pageTitle: {
-    marginTop: 18,
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    paddingBottom: 8,
+    paddingTop: 12,
   },
 });
-

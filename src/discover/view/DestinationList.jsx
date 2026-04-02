@@ -3,24 +3,30 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
 /**
- * Pure view — list of recommended destinations.
+ * Pure view — list of Google Places–style results (mock).
  */
-export function DestinationList({ destinations }) {
+export function DestinationList({ destinations, title, subtitle }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.title}>Recommended For You</Text>
+      <Text style={styles.title}>{title ?? 'Places'}</Text>
+      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       {destinations.map((item) => (
         <View key={item.id} style={styles.card}>
           <Image source={{ uri: item.imageUrl }} style={styles.image} />
           <View style={styles.body}>
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.country}>{item.country}</Text>
-            <Text style={styles.reason}>{item.reason}</Text>
+            {item.source ? (
+              <Text style={styles.source}>{item.source}</Text>
+            ) : null}
+            {item.reason ? (
+              <Text style={styles.reason}>{item.reason}</Text>
+            ) : null}
           </View>
         </View>
       ))}
       {destinations.length === 0 && (
-        <Text style={styles.empty}>No destinations match your search.</Text>
+        <Text style={styles.empty}>No places match your search.</Text>
       )}
     </View>
   );
@@ -35,6 +41,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: Colors.textPrimary,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  source: {
+    marginTop: 6,
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '500',
   },
   card: {
     backgroundColor: Colors.surface,
