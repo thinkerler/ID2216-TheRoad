@@ -33,7 +33,7 @@ export const ProfileScreen = observer(function ProfileScreen() {
 
   const loadStatus = ProfilePresenter.getLoadStatus();
   const errorMessage = ProfilePresenter.getErrorMessage();
-  const avatarUploadStatus = ProfilePresenter.getAvatarUploadStatus();
+  const isUploading = ProfilePresenter.isAvatarUploading();
 
   const pickAndUploadAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -73,7 +73,7 @@ export const ProfileScreen = observer(function ProfileScreen() {
             <ProfileHeader
               profile={ProfilePresenter.getProfile()}
               onUploadAvatar={pickAndUploadAvatar}
-              isUploading={avatarUploadStatus === 'loading'}
+              isUploading={isUploading}
             />
           )}
 

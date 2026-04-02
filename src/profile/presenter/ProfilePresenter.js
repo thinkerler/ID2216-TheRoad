@@ -34,9 +34,14 @@ export const ProfilePresenter = {
     return profileStore.errorMessage;
   },
 
-  /** @returns {Object | null} */
+  /** @returns {Object | null} — view model, not raw store data */
   getProfile() {
-    return profileStore.profile;
+    const p = profileStore.profile;
+    if (!p) return null;
+    return {
+      ...p,
+      badgeLabelText: `${p.badgeLabel} Level ${p.badgeLevel}`,
+    };
   },
 
   /** @returns {Object[]} */
@@ -77,5 +82,10 @@ export const ProfilePresenter = {
   /** @returns {'idle' | 'loading' | 'success' | 'error'} */
   getAvatarUploadStatus() {
     return profileStore.avatarUploadStatus;
+  },
+
+  /** @returns {boolean} */
+  isAvatarUploading() {
+    return profileStore.avatarUploadStatus === 'loading';
   },
 };
