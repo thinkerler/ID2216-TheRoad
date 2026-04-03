@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { observer } from 'mobx-react-lite';
+import { useRouter } from 'expo-router';
 import { Colors } from '../../shared/theme/colors';
 import { StatusOverlay } from '../../shared/ui/StatusOverlay';
 import { JourneysPresenter } from '../presenter/JourneysPresenter';
 import { JourneyCard } from './JourneyCard';
 
 export const JourneysScreen = observer(function JourneysScreen() {
+  const router = useRouter();
+
   useEffect(() => {
     JourneysPresenter.init();
   }, []);
@@ -40,7 +43,13 @@ export const JourneysScreen = observer(function JourneysScreen() {
           renderItem={({ item }) => (
             <JourneyCard
               journey={item}
-              onPress={(journeyId) => JourneysPresenter.onJourneyPress(journeyId)}
+              onPress={(journeyId) => {
+                JourneysPresenter.onJourneyPress(journeyId);
+                router.push({
+                  pathname: '/journeyDetail',
+                  params: { journeyId },
+                });
+              }}
             />
           )}
           ListEmptyComponent={
