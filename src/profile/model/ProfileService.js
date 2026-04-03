@@ -9,6 +9,7 @@ import { getDownloadURL, ref } from 'firebase/storage';
 import { signInAnonymously } from 'firebase/auth';
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -133,6 +134,29 @@ export const ProfileService = {
           'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=300&fit=crop',
       };
     });
+  },
+
+  /** @returns {Promise<void>} */
+  async addWishlistItem(item, uid) {
+    const resolvedUid = await ensureUid(uid);
+    const placeId = item.id;
+    if (!placeId) throw new Error('Wishlist item requires id');
+    await setDoc(
+      doc(db, `users/${resolvedUid}/wishlist/${placeId}`),
+      {
+        name: item.name ?? 'Untitled',
+        imageUrl: item.imageUrl ?? '',
+        keywords: item.keywords ?? [],
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  },
+
+  /** @returns {Promise<void>} */
+  async removeWishlistItem(placeId, uid) {
+    const resolvedUid = await ensureUid(uid);
+    await deleteDoc(doc(db, `users/${resolvedUid}/wishlist/${placeId}`));
   },
 
   /** @returns {Promise<Object>} */

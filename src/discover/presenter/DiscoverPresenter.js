@@ -17,8 +17,12 @@ export const DiscoverPresenter = {
     discoverStore.loadAll();
   },
 
-  onSearchChange(query) {
-    discoverStore.setSearchQuery(query);
+  onToggleWishlist(place) {
+    discoverStore.toggleWishlistForPlace(place);
+  },
+
+  onUnlikePlace(place) {
+    discoverStore.unlikePlace(place);
   },
 
   getLoadStatus() {
@@ -29,16 +33,47 @@ export const DiscoverPresenter = {
     return discoverStore.errorMessage;
   },
 
-  getSearchQuery() {
-    return discoverStore.searchQuery;
+  getTopPicks() {
+    return discoverStore.topPicks.map((place) => ({
+      ...place,
+      heartIconName: place.isInWishlist ? 'heart' : 'heart-outline',
+      heartActive: !!place.isInWishlist,
+    }));
   },
 
-  getDestinations() {
-    return discoverStore.filteredDestinations;
+  getCommunityInsights() {
+    return discoverStore.communityInsights;
   },
 
-  getInsights() {
-    return discoverStore.insights;
+  getWishToggleStatus() {
+    return discoverStore.wishToggleStatus;
+  },
+
+  onPlacePress(place) {
+    discoverStore.openPlaceDetail(place);
+  },
+
+  onCloseDetail() {
+    discoverStore.closeDetail();
+  },
+
+  getSelectedPlace() {
+    const p = discoverStore.selectedPlace;
+    if (!p) return null;
+    return {
+      id: p.id,
+      name: p.name,
+      country: p.country,
+      imageUrl: p.imageUrl,
+      whyVisit: p.reason ?? null,
+    };
+  },
+
+  getPlaceDetail() {
+    return discoverStore.placeDetail;
+  },
+
+  getDetailStatus() {
+    return discoverStore.detailStatus;
   },
 };
-

@@ -7,7 +7,7 @@ import { Colors } from '../../shared/theme/colors';
  * Data comes via props from ProfileScreen (which gets it from presenter).
  */
 export function ProfileHeader({ profile, onUploadAvatar, isUploading }) {
-  const badgeLabel = `${profile.badgeLabel} Level ${profile.badgeLevel}`;
+  const badgeLabel = profile.badgeLabelText;
 
   return (
     <View style={styles.container}>
