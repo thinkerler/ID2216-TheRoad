@@ -5,7 +5,7 @@
  * Nothing here knows about app state, stores, or business logic.
  */
 
-const API_KEY = 'AIzaSyAOMC2T678FvyyQ-mUrvnXKnFlRz2UiNrk';
+const API_KEY = process.env.EXPO_PUBLIC_PLACES_API_KEY;
 const BASE = 'https://places.googleapis.com/v1';
 
 // Embed region names in the query to get globally diverse results

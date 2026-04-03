@@ -6,7 +6,6 @@ export default {
     orientation: 'portrait',
     scheme: 'theroad',
     userInterfaceStyle: 'automatic',
-    newArchEnabled: false,
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.kth.theroadgoeseveron',
