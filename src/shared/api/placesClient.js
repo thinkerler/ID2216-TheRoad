@@ -74,7 +74,7 @@ export const placesClient = {
   },
 
   async getPlaceDetail(placeId) {
-    const res = await fetch(`${BASE}/places/${placeId}`, {
+    const res = await fetch(`${BASE}/places/${placeId}?languageCode=en`, {
       method: 'GET',
       headers: headers(DETAIL_FIELDS),
     });
