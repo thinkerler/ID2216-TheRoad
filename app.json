@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "The Road Goes Ever On",
+    "slug": "the-road-goes-ever-on",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "theroad",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kth.theroadgoeseveron"
+    },
+    "android": {
+      "package": "com.kth.theroadgoeseveron",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0E1A"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": ["android.permission.RECORD_AUDIO"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router", "expo-image-picker"],
+    "extra": {
+      "router": {}
+    }
+  }
+}

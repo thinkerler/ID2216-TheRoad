@@ -8,15 +8,6 @@ import { FeaturedRecommendationCarousel } from './FeaturedRecommendationCarousel
 import { CommunityInsightsSection } from './CommunityInsightsSection';
 import { PlaceDetailModal } from './PlaceDetailModal';
 
-/**
- * DiscoverScreen — primary View for Discover tab.
- *
- * Concern separation:
- * - View: this file + subviews
- * - Presenter: DiscoverPresenter
- * - App State: DiscoverStore (MobX)
- * - Persistence: DiscoverService
- */
 export const DiscoverScreen = observer(function DiscoverScreen() {
   useEffect(() => {
     DiscoverPresenter.init();
@@ -52,6 +43,7 @@ export const DiscoverScreen = observer(function DiscoverScreen() {
         >
           <FeaturedRecommendationCarousel
             places={topPicks}
+            onCardPress={(place) => DiscoverPresenter.onPlacePress(place)}
             onLike={(place) => DiscoverPresenter.onToggleWishlist(place)}
             onUnlike={(place) => DiscoverPresenter.onUnlikePlace(place)}
             toggleStatus={wishToggleStatus}

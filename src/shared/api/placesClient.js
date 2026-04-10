@@ -1,15 +1,6 @@
-/**
- * placesClient — Google Places API (New) client.
- *
- * Handles all HTTP communication with the Places API.
- * Nothing here knows about app state, stores, or business logic.
- */
-
 const API_KEY = process.env.EXPO_PUBLIC_PLACES_API_KEY;
 const BASE = 'https://places.googleapis.com/v1';
 
-// Embed region names in the query to get globally diverse results
-// without relying on locationBias (which has a 50km radius limit)
 const WORLD_REGIONS = [
   'Asia',
   'Europe Mediterranean',
@@ -52,13 +43,6 @@ async function handleResponse(res) {
 }
 
 export const placesClient = {
-  /**
-   * Search tourist attractions by keyword + budget, biased to a world region
-   * to ensure globally diverse results regardless of device IP.
-   * @param {string} keyword  e.g. "Culture"
-   * @param {number} budget   user's budgetPerDay in USD
-   * @param {number} regionIndex  index into WORLD_REGIONS
-   */
   async searchText(keyword, budget, regionIndex = 0) {
     const region = WORLD_REGIONS[regionIndex % WORLD_REGIONS.length];
     const budgetLabel = budget <= 100 ? 'budget' : budget <= 250 ? 'mid-range' : 'luxury';
@@ -75,11 +59,6 @@ export const placesClient = {
     return data.places ?? [];
   },
 
-  /**
-   * Search by place name — used as fallback to resolve a real Place ID
-   * when only a name is known (e.g. mock community insight items).
-   * @param {string} name  e.g. "Ubud Rice Terraces"
-   */
   async searchByName(name) {
     const res = await fetch(`${BASE}/places:searchText`, {
       method: 'POST',
@@ -94,22 +73,14 @@ export const placesClient = {
     return data.places?.[0] ?? null;
   },
 
-  /**
-   * Fetch full details for a single place by its Places API ID.
-   * @param {string} placeId
-   */
   async getPlaceDetail(placeId) {
-    const res = await fetch(`${BASE}/places/${placeId}`, {
+    const res = await fetch(`${BASE}/places/${placeId}?languageCode=en`, {
       method: 'GET',
       headers: headers(DETAIL_FIELDS),
     });
     return handleResponse(res);
   },
 
-  /**
-   * Build a photo media URL — no network call, used directly by <Image>.
-   * @param {string} photoName  e.g. "places/ABC/photos/XYZ"
-   */
   photoUrl(photoName) {
     return `${BASE}/${photoName}/media?maxWidthPx=600&key=${API_KEY}`;
   },

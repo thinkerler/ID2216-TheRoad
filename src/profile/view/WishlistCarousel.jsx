@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, Image, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, Pressable } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * Pure view — horizontal wishlist image carousel.
- * Data comes via props; no direct persistence access.
- */
-export function WishlistCarousel({ wishlist }) {
+export function WishlistCarousel({ wishlist, onItemPress }) {
   const renderItem = ({ item }) => (
-    <Image source={{ uri: item.imageUrl }} style={styles.image} />
+    <Pressable
+      onPress={() => onItemPress?.(item)}
+      accessibilityRole="button"
+      accessibilityLabel={`Open details for ${item.name}`}
+    >
+      <Image source={{ uri: item.imageUrl }} style={styles.image} />
+    </Pressable>
   );
 
   return (

@@ -1,42 +1,30 @@
-export default {
+const appJson = require('./app.json');
+
+const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+module.exports = {
   expo: {
-    name: 'The Road Goes Ever On',
-    slug: 'the-road-goes-ever-on',
-    version: '1.0.0',
-    orientation: 'portrait',
-    scheme: 'theroad',
-    userInterfaceStyle: 'automatic',
-    ios: {
-      supportsTablet: true,
-      bundleIdentifier: 'com.kth.theroadgoeseveron',
-    },
+    ...appJson.expo,
+    newArchEnabled: true,
     android: {
-      package: 'com.kth.theroadgoeseveron',
-      adaptiveIcon: {
-        backgroundColor: '#0A0E1A',
-      },
-      edgeToEdgeEnabled: true,
-      permissions: ['android.permission.RECORD_AUDIO'],
+      ...appJson.expo.android,
+      package: appJson.expo.android?.package || 'com.kth.theroadgoeseveron',
       config: {
+        ...appJson.expo.android?.config,
         googleMaps: {
-          apiKey: 'AIzaSyAPVllwYXp7o5MUaravqS7wx1yMocC2iN4',
+          apiKey: googleMapsApiKey,
         },
       },
     },
-    web: {
-      bundler: 'metro',
-      output: 'static',
-    },
     plugins: [
-      'expo-router',
-      'expo-image-picker',
+      ...(appJson.expo.plugins || []),
       [
         './plugins/withGoogleMapsApiKey',
-        { apiKey: 'AIzaSyAPVllwYXp7o5MUaravqS7wx1yMocC2iN4' },
+        { apiKey: googleMapsApiKey },
       ],
     ],
     extra: {
-      router: {},
+      ...appJson.expo?.extra,
       eas: {
         projectId: 'f0ac63ea-687d-4156-93b9-325d1cac87a3',
       },

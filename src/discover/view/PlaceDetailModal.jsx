@@ -11,10 +11,6 @@ import {
 } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * PlaceDetailModal — pure View.
- * Shows local place info immediately; enriches with API detail once loaded.
- */
 export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
   if (!place) return null;
 
@@ -26,12 +22,10 @@ export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
       onRequestClose={onClose}
     >
       <View style={styles.sheet}>
-        {/* Header image */}
         {place.imageUrl ? (
           <Image source={{ uri: place.imageUrl }} style={styles.hero} />
         ) : null}
 
-        {/* Close button */}
         <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Close">
           <Text style={styles.closeBtnIcon}>✕</Text>
         </Pressable>
@@ -41,13 +35,11 @@ export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Name + address */}
           <Text style={styles.name}>{detail?.name ?? place.name}</Text>
           <Text style={styles.address}>
             {detail?.address ?? place.country}
           </Text>
 
-          {/* Rating */}
           {detail?.rating ? (
             <View style={styles.ratingRow}>
               <Text style={styles.ratingIcon}>★</Text>
@@ -60,7 +52,6 @@ export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
             </View>
           ) : null}
 
-          {/* Description */}
           {detailStatus === 'loading' ? (
             <ActivityIndicator color={Colors.primary} style={styles.spinner} />
           ) : null}
@@ -77,7 +68,6 @@ export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
             </View>
           ) : null}
 
-          {/* Opening hours */}
           {detail?.openingHours?.length ? (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Opening Hours</Text>
@@ -87,7 +77,6 @@ export function PlaceDetailModal({ place, detail, detailStatus, onClose }) {
             </View>
           ) : null}
 
-          {/* Website */}
           {detail?.website ? (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Website</Text>

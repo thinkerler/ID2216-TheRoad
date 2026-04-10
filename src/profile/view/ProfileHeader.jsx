@@ -2,10 +2,6 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * Pure view — renders avatar, name, and badge.
- * Data comes via props from ProfileScreen (which gets it from presenter).
- */
 export function ProfileHeader({ profile, onUploadAvatar, isUploading }) {
   const badgeLabel = profile.badgeLabelText;
 
