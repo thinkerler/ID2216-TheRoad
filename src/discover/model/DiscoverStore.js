@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
+import { profileStore } from '../../profile/model/ProfileStore';
 import { DiscoverService } from './DiscoverService';
 
 class DiscoverStoreClass {
@@ -59,6 +60,7 @@ class DiscoverStoreClass {
         );
         this.wishToggleStatus = 'idle';
       });
+      profileStore.refreshWishlist();
     } catch (e) {
       runInAction(() => {
         this.wishToggleStatus = 'idle';

@@ -43,6 +43,7 @@ export const DiscoverScreen = observer(function DiscoverScreen() {
         >
           <FeaturedRecommendationCarousel
             places={topPicks}
+            onCardPress={(place) => DiscoverPresenter.onPlacePress(place)}
             onLike={(place) => DiscoverPresenter.onToggleWishlist(place)}
             onUnlike={(place) => DiscoverPresenter.onUnlikePlace(place)}
             toggleStatus={wishToggleStatus}
