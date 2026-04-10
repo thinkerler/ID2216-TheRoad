@@ -1,12 +1,21 @@
-import { useMemo, useRef, useEffect, useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Platform, Pressable } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useMemo, useRef, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Platform, Pressable, ScrollView } from 'react-native';
+import Constants from 'expo-constants';
 import { Colors, BorderRadius } from '../../shared/theme';
 
-/**
- * Hub 地图 — react-native-maps（GitHub: react-native-maps/react-native-maps）。
- * iOS: Apple Maps；Android: Google Maps（需 EXPO_PUBLIC_GOOGLE_MAPS_API_KEY）。
- */
+function tryLoadMaps() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
+  try {
+    const m = require('react-native-maps');
+    return m?.default ? m : null;
+  } catch {
+    return null;
+  }
+}
+
+const maps = tryLoadMaps();
 
 const DARK_MAP_STYLE = [
   { elementType: 'geometry', stylers: [{ color: '#0d1b2a' }] },
@@ -56,13 +65,63 @@ function regionFromCoords(coords) {
   };
 }
 
-export default function GlobeMap({
+function GlobeMapFallback({ locations, selectedName, onMarkerPress }) {
+  const items = useMemo(
+    () =>
+      (locations || []).map((l) => ({
+        id: l.id,
+        name: l.name,
+        label: l.nameEn ?? l.name,
+      })),
+    [locations],
+  );
+  return (
+    <View style={fb.root}>
+      <Text style={fb.hint}>Map unavailable in Expo Go — dev build has full map.</Text>
+      <ScrollView nestedScrollEnabled style={fb.scroll}>
+        {items.map((m) => (
+          <Pressable
+            key={m.id}
+            onPress={() => onMarkerPress?.(m.name)}
+            style={[fb.row, selectedName === m.name && fb.rowOn]}
+          >
+            <Text style={[fb.t, selectedName === m.name && fb.tOn]} numberOfLines={1}>
+              {m.label}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+const fb = StyleSheet.create({
+  root: {
+    flex: 1,
+    minHeight: 260,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.borderSubtle,
+    padding: 12,
+  },
+  hint: { fontSize: 12, color: Colors.textSecondary, marginBottom: 8 },
+  scroll: { maxHeight: 200 },
+  row: { paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, marginBottom: 4 },
+  rowOn: { borderWidth: 1, borderColor: Colors.secondary },
+  t: { fontSize: 13, color: Colors.textPrimary },
+  tOn: { color: Colors.secondary, fontWeight: '600' },
+});
+
+function GlobeMapNative({
   locations,
   routeCoords,
   selectedName,
   fitKey,
   onMarkerPress,
 }) {
+  const MapView = maps.default;
+  const { Marker, Polyline, PROVIDER_GOOGLE } = maps;
   const mapRef = useRef(null);
 
   const markers = useMemo(
@@ -160,6 +219,11 @@ export default function GlobeMap({
       </MapView>
     </View>
   );
+}
+
+export default function GlobeMap(props) {
+  if (!maps) return <GlobeMapFallback {...props} />;
+  return <GlobeMapNative {...props} />;
 }
 
 function MarkerDot({ color, label, isSelected }) {
