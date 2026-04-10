@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
+import { DiscoverService } from '../../discover/model/DiscoverService';
 import { ProfileService } from './ProfileService';
 
 class ProfileStoreClass {
@@ -15,6 +16,12 @@ class ProfileStoreClass {
   errorMessage = null;
 
   avatarUploadStatus = 'idle';
+
+  wishlistDetailPlace = null;
+
+  wishlistPlaceDetail = null;
+
+  wishlistDetailStatus = 'idle';
 
   constructor() {
     makeAutoObservable(this);
@@ -49,6 +56,43 @@ class ProfileStoreClass {
         this.errorMessage = e.message ?? 'Failed to load profile';
       });
     }
+  }
+
+  /** Re-fetch wishlist only (e.g. after Discover tab updates Firestore). */
+  async refreshWishlist() {
+    try {
+      const wishlist = await ProfileService.fetchWishlist();
+      runInAction(() => {
+        this.wishlist = wishlist;
+      });
+    } catch {
+      /* keep existing wishlist */
+    }
+  }
+
+  async openWishlistPlaceDetail(item) {
+    runInAction(() => {
+      this.wishlistDetailPlace = {
+        id: item.id,
+        name: item.name,
+        imageUrl: item.imageUrl,
+        country: '',
+        reason: null,
+      };
+      this.wishlistPlaceDetail = null;
+      this.wishlistDetailStatus = 'loading';
+    });
+    const detail = await DiscoverService.fetchPlaceDetail(item.id, item.name);
+    runInAction(() => {
+      this.wishlistPlaceDetail = detail;
+      this.wishlistDetailStatus = detail ? 'success' : 'error';
+    });
+  }
+
+  closeWishlistPlaceDetail() {
+    this.wishlistDetailPlace = null;
+    this.wishlistPlaceDetail = null;
+    this.wishlistDetailStatus = 'idle';
   }
 
   async updatePreferences(newPrefs) {

@@ -8,6 +8,7 @@ import { ProfilePresenter } from '../presenter/ProfilePresenter';
 import { ProfileHeader } from './ProfileHeader';
 import { WishlistCarousel } from './WishlistCarousel';
 import { PreferencePanel } from './PreferencePanel';
+import { PlaceDetailModal } from '../../discover/view/PlaceDetailModal';
 
 export const ProfileScreen = observer(function ProfileScreen() {
   useEffect(() => {
@@ -64,7 +65,17 @@ export const ProfileScreen = observer(function ProfileScreen() {
             />
           ) : null}
 
-          <WishlistCarousel wishlist={wishlist} />
+          <WishlistCarousel
+            wishlist={wishlist}
+            onItemPress={(item) => ProfilePresenter.onWishlistItemPress(item)}
+          />
+
+          <PlaceDetailModal
+            place={ProfilePresenter.getWishlistDetailPlace()}
+            detail={ProfilePresenter.getWishlistPlaceDetail()}
+            detailStatus={ProfilePresenter.getWishlistDetailStatus()}
+            onClose={() => ProfilePresenter.onCloseWishlistDetail()}
+          />
 
           {preferences ? (
             <PreferencePanel

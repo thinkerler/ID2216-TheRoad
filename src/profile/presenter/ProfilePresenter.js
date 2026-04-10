@@ -57,4 +57,32 @@ export const ProfilePresenter = {
   getAvatarUploadStatus() {
     return profileStore.avatarUploadStatus;
   },
+
+  onWishlistItemPress(item) {
+    profileStore.openWishlistPlaceDetail(item);
+  },
+
+  onCloseWishlistDetail() {
+    profileStore.closeWishlistPlaceDetail();
+  },
+
+  getWishlistDetailPlace() {
+    const p = profileStore.wishlistDetailPlace;
+    if (!p) return null;
+    return {
+      id: p.id,
+      name: p.name,
+      country: p.country,
+      imageUrl: p.imageUrl,
+      whyVisit: p.reason ?? null,
+    };
+  },
+
+  getWishlistPlaceDetail() {
+    return profileStore.wishlistPlaceDetail;
+  },
+
+  getWishlistDetailStatus() {
+    return profileStore.wishlistDetailStatus;
+  },
 };
