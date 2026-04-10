@@ -1,16 +1,8 @@
 import { discoverStore } from '../model/DiscoverStore';
 
-/**
- * DiscoverPresenter — Presenter/Controller concern.
- *
- * Reads state from store and exposes user-intent actions for views.
- * Never imports persistence services directly.
- */
 export const DiscoverPresenter = {
   init() {
-    if (discoverStore.loadStatus === 'idle') {
-      discoverStore.loadAll();
-    }
+    discoverStore.init();
   },
 
   reload() {
@@ -18,11 +10,11 @@ export const DiscoverPresenter = {
   },
 
   onToggleWishlist(place) {
-    discoverStore.toggleWishlistForPlace(place);
+    discoverStore.setWishlistLiked(place, !place.isInWishlist);
   },
 
   onUnlikePlace(place) {
-    discoverStore.unlikePlace(place);
+    discoverStore.setWishlistLiked(place, false);
   },
 
   getLoadStatus() {

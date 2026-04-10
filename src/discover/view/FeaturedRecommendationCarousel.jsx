@@ -15,9 +15,6 @@ import { Colors } from '../../shared/theme/colors';
 
 const CARD_HEIGHT = 340;
 
-/**
- * Swipeable destination cards for the Discover tab.
- */
 export function FeaturedRecommendationCarousel({
   places,
   onLike,
@@ -25,7 +22,7 @@ export function FeaturedRecommendationCarousel({
   toggleStatus,
 }) {
   const screenW = Dimensions.get('window').width;
-  const CARD_W = screenW - 40; // 20px margin each side
+  const CARD_W = screenW - 40;
   const [index, setIndex] = useState(0);
 
   const renderItem = ({ item }) => (
@@ -33,8 +30,6 @@ export function FeaturedRecommendationCarousel({
       <View style={[styles.card, { width: CARD_W, height: CARD_HEIGHT }]}>
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
 
-
-        {/* stacked bottom content */}
         <View style={styles.bottomContent}>
           <Text style={styles.heroTitle} numberOfLines={1}>
             {item.name}
@@ -49,7 +44,6 @@ export function FeaturedRecommendationCarousel({
             </Text>
           </View>
 
-          {/* circular buttons */}
           <View style={styles.actions}>
             <Pressable
               style={styles.btnPass}

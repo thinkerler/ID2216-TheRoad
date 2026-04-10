@@ -1,39 +1,31 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { DiscoverService } from './DiscoverService';
 
-/**
- * DiscoverStore — Application State concern (MobX).
- *
- * Owns async status + UI state.
- * All persistence side effects must go through this store.
- */
 class DiscoverStoreClass {
-  /** @type {Object[]} */
   topPicks = [];
 
-  /** @type {Object[]} */
   communityInsights = [];
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   loadStatus = 'idle';
 
-  /** @type {string | null} */
   errorMessage = null;
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   wishToggleStatus = 'idle';
 
-  /** @type {Object|null} — the card that was tapped */
   selectedPlace = null;
 
-  /** @type {Object|null} — fetched API detail for selectedPlace */
   placeDetail = null;
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   detailStatus = 'idle';
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  init() {
+    if (this.loadStatus === 'idle') {
+      this.loadAll();
+    }
   }
 
   async loadAll() {
@@ -55,16 +47,15 @@ class DiscoverStoreClass {
     }
   }
 
-  /** Toggle wishlist for a place in the top section; updates local isInWishlist. */
-  async toggleWishlistForPlace(place) {
-    const nextLiked = !place.isInWishlist;
+  async setWishlistLiked(place, liked) {
+    if (!!place.isInWishlist === liked) return;
     this.wishToggleStatus = 'loading';
     this.errorMessage = null;
     try {
-      await DiscoverService.setWishlistLiked(place, nextLiked);
+      await DiscoverService.setWishlistLiked(place, liked);
       runInAction(() => {
         this.topPicks = this.topPicks.map((p) =>
-          p.id === place.id ? { ...p, isInWishlist: nextLiked } : p,
+          p.id === place.id ? { ...p, isInWishlist: liked } : p,
         );
         this.wishToggleStatus = 'idle';
       });
@@ -76,7 +67,6 @@ class DiscoverStoreClass {
     }
   }
 
-  /** Open detail modal for a place; fetch API detail if available. */
   async openPlaceDetail(place) {
     this.selectedPlace = place;
     this.placeDetail = null;
@@ -84,7 +74,7 @@ class DiscoverStoreClass {
     const detail = await DiscoverService.fetchPlaceDetail(place.id, place.name);
     runInAction(() => {
       this.placeDetail = detail;
-      this.detailStatus = 'success';
+      this.detailStatus = detail ? 'success' : 'error';
     });
   }
 
@@ -92,27 +82,6 @@ class DiscoverStoreClass {
     this.selectedPlace = null;
     this.placeDetail = null;
     this.detailStatus = 'idle';
-  }
-
-  /** Remove from wishlist if already saved. */
-  async unlikePlace(place) {
-    if (!place.isInWishlist) return;
-    this.wishToggleStatus = 'loading';
-    this.errorMessage = null;
-    try {
-      await DiscoverService.setWishlistLiked(place, false);
-      runInAction(() => {
-        this.topPicks = this.topPicks.map((p) =>
-          p.id === place.id ? { ...p, isInWishlist: false } : p,
-        );
-        this.wishToggleStatus = 'idle';
-      });
-    } catch (e) {
-      runInAction(() => {
-        this.wishToggleStatus = 'idle';
-        this.errorMessage = e.message ?? 'Could not update wishlist';
-      });
-    }
   }
 }
 

@@ -1,47 +1,31 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { ProfileService } from './ProfileService';
 
-/**
- * ProfileStore — Application State concern (MobX).
- *
- * Grading matrix A requirement:
- *   "State manager (Mobx with actions).
- *    All application state side effects (e.g. persistence) use the state manager."
- *
- * Rules:
- *   - Only this store calls ProfileService (persistence)
- *   - Presenter reads this store, never writes to service directly
- *   - Views observe this store via mobx-react-lite `observer`
- *
- * Call direction: Store → Service (for persistence side effects)
- */
 class ProfileStoreClass {
-  /** @type {Object | null} */
   profile = null;
 
-  /** @type {Object[]} */
   wishlist = [];
 
-  /** @type {Object | null} */
   preferences = null;
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   loadStatus = 'idle';
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   exportStatus = 'idle';
 
-  /** @type {string | null} */
   errorMessage = null;
 
-  /** @type {'idle' | 'loading' | 'success' | 'error'} */
   avatarUploadStatus = 'idle';
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  /** Load all profile data from persistence via Service. */
+  init() {
+    if (this.loadStatus === 'idle') {
+      this.loadAll();
+    }
+  }
+
   async loadAll() {
     this.loadStatus = 'loading';
     this.errorMessage = null;
@@ -67,7 +51,6 @@ class ProfileStoreClass {
     }
   }
 
-  /** Persist updated preferences via Service. */
   async updatePreferences(newPrefs) {
     try {
       await ProfileService.savePreferences(newPrefs);
@@ -81,7 +64,6 @@ class ProfileStoreClass {
     }
   }
 
-  /** Persist only budget change via service. */
   async updateBudgetPerDay(budgetPerDay) {
     if (!this.preferences) return;
     const nextBudget = Number(budgetPerDay);
@@ -90,7 +72,6 @@ class ProfileStoreClass {
     await this.updatePreferences({ budgetPerDay: Math.round(nextBudget) });
   }
 
-  /** Upload avatar image and refresh profile object. */
   async uploadAvatar(localUri) {
     this.avatarUploadStatus = 'loading';
     this.errorMessage = null;
@@ -101,7 +82,6 @@ class ProfileStoreClass {
         this.avatarUploadStatus = 'success';
       });
     } catch (e) {
-      console.error('uploadAvatar failed:', e);
       runInAction(() => {
         this.avatarUploadStatus = 'error';
         this.errorMessage = e.message ?? 'Failed to upload avatar';
@@ -109,7 +89,6 @@ class ProfileStoreClass {
     }
   }
 
-  /** Trigger data export via Service. */
   async exportData() {
     this.exportStatus = 'loading';
 

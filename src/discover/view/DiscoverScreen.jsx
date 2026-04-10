@@ -8,15 +8,6 @@ import { FeaturedRecommendationCarousel } from './FeaturedRecommendationCarousel
 import { CommunityInsightsSection } from './CommunityInsightsSection';
 import { PlaceDetailModal } from './PlaceDetailModal';
 
-/**
- * DiscoverScreen — primary View for Discover tab.
- *
- * Concern separation:
- * - View: this file + subviews
- * - Presenter: DiscoverPresenter
- * - App State: DiscoverStore (MobX)
- * - Persistence: DiscoverService
- */
 export const DiscoverScreen = observer(function DiscoverScreen() {
   useEffect(() => {
     DiscoverPresenter.init();

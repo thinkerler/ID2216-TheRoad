@@ -9,11 +9,8 @@ import {
 } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * Pure view — peer / community-style horizontal cards (mock 3.png lower section).
- */
-export function CommunityInsightsSection({ items, onPress }) {
-  if (!items?.length) return null;
+export function CommunityInsightsSection({ items = [], onPress }) {
+  if (!items.length) return null;
 
   return (
     <View style={styles.section}>

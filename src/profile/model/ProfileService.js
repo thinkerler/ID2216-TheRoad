@@ -1,9 +1,3 @@
-/**
- * ProfileService — Persistence concern.
- *
- * Store calls this service; View/Presenter stay untouched.
- * This implementation uses Firebase Auth + Firestore.
- */
 import * as FileSystem from 'expo-file-system/legacy';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { signInAnonymously } from 'firebase/auth';
@@ -114,13 +108,11 @@ async function ensurePreferencesDoc(uid) {
 }
 
 export const ProfileService = {
-  /** @returns {Promise<Object>} */
   async fetchProfile(uid) {
     const resolvedUid = await ensureUid(uid);
     return ensureProfileDoc(resolvedUid);
   },
 
-  /** @returns {Promise<Object[]>} */
   async fetchWishlist(uid) {
     const resolvedUid = await ensureUid(uid);
     const snap = await getDocs(wishlistRef(resolvedUid));
@@ -136,7 +128,6 @@ export const ProfileService = {
     });
   },
 
-  /** @returns {Promise<void>} */
   async addWishlistItem(item, uid) {
     const resolvedUid = await ensureUid(uid);
     const placeId = item.id;
@@ -153,19 +144,16 @@ export const ProfileService = {
     );
   },
 
-  /** @returns {Promise<void>} */
   async removeWishlistItem(placeId, uid) {
     const resolvedUid = await ensureUid(uid);
     await deleteDoc(doc(db, `users/${resolvedUid}/wishlist/${placeId}`));
   },
 
-  /** @returns {Promise<Object>} */
   async fetchPreferences(uid) {
     const resolvedUid = await ensureUid(uid);
     return ensurePreferencesDoc(resolvedUid);
   },
 
-  /** @returns {Promise<void>} */
   async savePreferences(uidOrPrefs, maybePrefs) {
     const maybeUid = typeof uidOrPrefs === 'string' ? uidOrPrefs : undefined;
     const prefs = maybeUid ? maybePrefs : uidOrPrefs;
@@ -180,7 +168,6 @@ export const ProfileService = {
     );
   },
 
-  /** @returns {Promise<Object>} */
   async updateProfilePatch(patch, uid) {
     const resolvedUid = await ensureUid(uid);
     const payload = {
@@ -198,12 +185,10 @@ export const ProfileService = {
     return this.fetchProfile(resolvedUid);
   },
 
-  /** @returns {Promise<Object>} */
   async uploadAvatar(localUri, uid) {
     if (!localUri) throw new Error('Missing local image uri');
     const resolvedUid = await ensureUid(uid);
 
-    // 用 expo-file-system 原生上传，完全绕开 Firebase JS SDK 的 Blob/ArrayBuffer 限制
     const token = await auth.currentUser.getIdToken();
     const bucket = 'the-road-goes-ever-on.firebasestorage.app';
     const avatarPath = `users/${resolvedUid}/avatars/current.jpg`;
@@ -229,7 +214,6 @@ export const ProfileService = {
     return this.updateProfilePatch({ avatarUrl: downloadUrl }, resolvedUid);
   },
 
-  /** @returns {Promise<string>} */
   async exportUserData(uid) {
     const resolvedUid = await ensureUid(uid);
     const [profile, preferences, wishlist] = await Promise.all([

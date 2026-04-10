@@ -2,9 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * Pure view — list of Google Places–style results (mock).
- */
+/** Horizontal list of place cards (Places API–shaped items). */
 export function DestinationList({ destinations, title, subtitle }) {
   return (
     <View style={styles.section}>

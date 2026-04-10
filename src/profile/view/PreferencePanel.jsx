@@ -2,10 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import { Colors } from '../../shared/theme/colors';
 
-/**
- * Pure view — renders preferences card (budget + activity tags).
- * Data comes via props; no direct persistence access.
- */
 export function PreferencePanel({ preferences, onSaveBudget }) {
   const budgetDisplay = `$${preferences.budgetPerDay}/day`;
   const [budgetInput, setBudgetInput] = React.useState(

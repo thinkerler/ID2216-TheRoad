@@ -9,23 +9,6 @@ import { ProfileHeader } from './ProfileHeader';
 import { WishlistCarousel } from './WishlistCarousel';
 import { PreferencePanel } from './PreferencePanel';
 
-/**
- * ProfileScreen — primary View for the Profile tab.
- *
- * Architecture compliance (grading matrix A):
- *   Concern        | Where
- *   ───────────────┼──────────────────────
- *   View           | this file + sub-views
- *   Presenter      | ProfilePresenter.js
- *   App State      | ProfileStore.js (MobX)
- *   Persistence    | ProfileService.js
- *   Navigation     | app/_layout.jsx (Expo Router)
- *
- * Call direction: View → Presenter → Store → Service
- *   - View reads presenter getters (which read store observables)
- *   - View dispatches actions to presenter (which delegates to store)
- *   - View NEVER imports Store or Service directly
- */
 export const ProfileScreen = observer(function ProfileScreen() {
   useEffect(() => {
     ProfilePresenter.init();
@@ -33,7 +16,11 @@ export const ProfileScreen = observer(function ProfileScreen() {
 
   const loadStatus = ProfilePresenter.getLoadStatus();
   const errorMessage = ProfilePresenter.getErrorMessage();
-  const isUploading = ProfilePresenter.isAvatarUploading();
+  const profile = ProfilePresenter.getProfile();
+  const wishlist = ProfilePresenter.getWishlist();
+  const preferences = ProfilePresenter.getPreferences();
+  const isUploading =
+    ProfilePresenter.getAvatarUploadStatus() === 'loading';
 
   const pickAndUploadAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -69,22 +56,22 @@ export const ProfileScreen = observer(function ProfileScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {ProfilePresenter.getProfile() && (
+          {profile ? (
             <ProfileHeader
-              profile={ProfilePresenter.getProfile()}
+              profile={profile}
               onUploadAvatar={pickAndUploadAvatar}
               isUploading={isUploading}
             />
-          )}
+          ) : null}
 
-          <WishlistCarousel wishlist={ProfilePresenter.getWishlist()} />
+          <WishlistCarousel wishlist={wishlist} />
 
-          {ProfilePresenter.getPreferences() && (
+          {preferences ? (
             <PreferencePanel
-              preferences={ProfilePresenter.getPreferences()}
+              preferences={preferences}
               onSaveBudget={ProfilePresenter.onUpdateBudgetPerDay}
             />
-          )}
+          ) : null}
         </ScrollView>
       </StatusOverlay>
     </View>
