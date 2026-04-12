@@ -3,6 +3,7 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { auth, db } from '../../shared/api/firebaseClient';
 import { mapFirestoreDocToTrip } from './mapFirestoreJourneyToTrip';
 import { MOCK_TRIPS } from './mockTrips';
+import { resolveCoordinatesForHub } from './resolveCoordinatesForHub';
 
 /** Same pacing as `JourneysService.fetchJourneys`. */
 const SIMULATED_LATENCY_MS = 180;
@@ -41,8 +42,15 @@ const HubService = {
       const snap = await getDocs(
         query(journeysRef(resolvedUid), orderBy('createdAt', 'desc')),
       );
-      firebaseTrips = snap.docs.map((d) =>
-        mapFirestoreDocToTrip(d.data(), d.id),
+      firebaseTrips = await Promise.all(
+        snap.docs.map(async (d) => {
+          const trip = mapFirestoreDocToTrip(d.data(), d.id);
+          trip.coordinates = await resolveCoordinatesForHub(
+            trip.destination,
+            trip.country,
+          );
+          return trip;
+        }),
       );
     } catch (e) {
       console.warn(

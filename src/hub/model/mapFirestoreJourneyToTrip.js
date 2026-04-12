@@ -35,7 +35,7 @@ function hashStringToLatLng(s) {
  * @param {string} country
  * @returns {import('./tripModel').Coordinates}
  */
-function coordinatesForDestination(destination, country) {
+export function coordinatesForDestination(destination, country) {
   const key = String(destination || '')
     .trim()
     .toLowerCase();
@@ -44,6 +44,14 @@ function coordinatesForDestination(destination, country) {
     return { latitude: c.latitude, longitude: c.longitude };
   }
   return hashStringToLatLng(`${destination}|${country}`);
+}
+
+/** True when coordinates come from hub mock table (no Places lookup needed). */
+export function isDestinationInMockLookup(destination) {
+  const key = String(destination || '')
+    .trim()
+    .toLowerCase();
+  return coordByDestination.has(key);
 }
 
 function toNonNegativeNumber(value, fallback = 0) {
