@@ -12,7 +12,7 @@ There are also a few platform-specific details worth noting. On Android, the nat
 
 - The app shell and tab navigation are in place under `src/app/`.
 - Firebase is connected through `src/shared/api/firebaseClient.js`, with anonymous auth, Firestore, and Storage.
-- `Journeys` supports listing trips, opening a detail page, and creating a new journey with photo uploads. We have included three sample journeys by default to demonstrate the features in `src/journeys/model/JourneysService.js`.
+- `Journeys` supports listing trips, opening a detail page, and creating a new journey with photo uploads. We have included three sample journeys by default in `src/journeys/model/JourneysService.js`.
 - `Discover` already shows Places-based recommendations, a detail modal, and wishlist interactions. The current "community" section is still generated from Places results rather than real user posts.
 - `Hub` shows a time slider, travel stats, a marker view, and a location sheet. It loads the same Firestore journeys as `Journeys`, tries to resolve coordinates for Firebase rows, and then appends the demo trips from `src/hub/model/mockTrips.js`.
 - `Profile` contains preferences and wishlist-related data through `ProfileService` and `ProfileStore`.
