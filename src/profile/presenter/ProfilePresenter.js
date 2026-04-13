@@ -1,5 +1,4 @@
 import { profileStore } from '../model/ProfileStore';
-import { DiscoverPresenter } from '../../discover/presenter/DiscoverPresenter';
 
 export const ProfilePresenter = {
   init() {
@@ -19,12 +18,7 @@ export const ProfilePresenter = {
   },
 
   getProfile() {
-    const p = profileStore.profile;
-    if (!p) return null;
-    return {
-      ...p,
-      badgeLabelText: `${p.badgeLabel} Level ${p.badgeLevel}`,
-    };
+    return profileStore.profileViewModel;
   },
 
   getWishlist() {
@@ -48,17 +42,24 @@ export const ProfilePresenter = {
   },
 
   onUpdateBudgetPerDay(budgetPerDay) {
-    void profileStore.updateBudgetPerDay(budgetPerDay).then((saved) => {
-      if (saved) DiscoverPresenter.reload();
-    });
+    profileStore.updateBudgetPerDay(budgetPerDay);
   },
 
-  onUploadAvatar(localUri) {
-    profileStore.uploadAvatar(localUri);
+  onPickAvatar() {
+    profileStore.pickAndUploadAvatar();
   },
 
   getAvatarUploadStatus() {
     return profileStore.avatarUploadStatus;
+  },
+
+  getBudgetInputValue() {
+    if (profileStore.budgetInputDraft !== null) return profileStore.budgetInputDraft;
+    return String(profileStore.preferences?.budgetPerDay ?? '');
+  },
+
+  onBudgetInputChange(value) {
+    profileStore.setBudgetInputDraft(value);
   },
 
   onWishlistItemPress(item) {
@@ -70,15 +71,7 @@ export const ProfilePresenter = {
   },
 
   getWishlistDetailPlace() {
-    const p = profileStore.wishlistDetailPlace;
-    if (!p) return null;
-    return {
-      id: p.id,
-      name: p.name,
-      country: p.country,
-      imageUrl: p.imageUrl,
-      whyVisit: p.reason ?? null,
-    };
+    return profileStore.wishlistDetailPlace;
   },
 
   getWishlistPlaceDetail() {

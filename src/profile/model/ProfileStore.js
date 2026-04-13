@@ -1,5 +1,5 @@
+import * as ImagePicker from 'expo-image-picker';
 import { makeAutoObservable, runInAction } from 'mobx';
-import { DiscoverService } from '../../discover/model/DiscoverService';
 import { ProfileService } from './ProfileService';
 
 class ProfileStoreClass {
@@ -22,6 +22,14 @@ class ProfileStoreClass {
   wishlistPlaceDetail = null;
 
   wishlistDetailStatus = 'idle';
+
+  budgetInputDraft = null;
+
+  get profileViewModel() {
+    const p = this.profile;
+    if (!p) return null;
+    return { ...p, badgeLabelText: `${p.badgeLabel} Level ${p.badgeLevel}` };
+  }
 
   constructor() {
     makeAutoObservable(this);
@@ -77,16 +85,20 @@ class ProfileStoreClass {
         name: item.name,
         imageUrl: item.imageUrl,
         country: '',
-        reason: null,
+        whyVisit: null,
       };
       this.wishlistPlaceDetail = null;
       this.wishlistDetailStatus = 'loading';
     });
-    const detail = await DiscoverService.fetchPlaceDetail(item.id, item.name);
+    const detail = await ProfileService.fetchPlaceDetail(item.id, item.name);
     runInAction(() => {
       this.wishlistPlaceDetail = detail;
       this.wishlistDetailStatus = detail ? 'success' : 'error';
     });
+  }
+
+  setBudgetInputDraft(value) {
+    this.budgetInputDraft = value;
   }
 
   closeWishlistPlaceDetail() {
@@ -100,6 +112,9 @@ class ProfileStoreClass {
       await ProfileService.savePreferences(newPrefs);
       runInAction(() => {
         this.preferences = { ...this.preferences, ...newPrefs };
+        if ('budgetPerDay' in newPrefs) {
+          this.budgetInputDraft = null;
+        }
       });
       return true;
     } catch (e) {
@@ -116,6 +131,19 @@ class ProfileStoreClass {
     if (!Number.isFinite(nextBudget) || nextBudget <= 0) return false;
 
     return this.updatePreferences({ budgetPerDay: Math.round(nextBudget) });
+  }
+
+  async pickAndUploadAvatar() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.7,
+      aspect: [1, 1],
+    });
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+    await this.uploadAvatar(result.assets[0].uri);
   }
 
   async uploadAvatar(localUri) {
