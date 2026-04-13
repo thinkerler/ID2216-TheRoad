@@ -1,15 +1,13 @@
 import { View, StyleSheet } from 'react-native';
-import { observer } from 'mobx-react-lite';
 import { Colors, Spacing } from '../../shared/theme';
-import HubPresenter from '../presenter/hubPresenter';
 import HubStatCard from './HubStatCard';
 
 /**
  * Horizontal row of summary statistics for filtered trips.
- * All data read from HubPresenter; no direct Model imports.
+ * Stats object passed from HubScreen (HubPresenter.stats).
  */
-function StatsCards() {
-  const { totalTrips, totalDays, totalExpenses } = HubPresenter.stats;
+function StatsCards({ stats }) {
+  const { totalTrips, totalDays, totalExpenses } = stats;
 
   return (
     <View style={styles.row}>
@@ -39,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(StatsCards);
+export default StatsCards;

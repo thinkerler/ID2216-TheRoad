@@ -1,12 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { observer } from 'mobx-react-lite';
 import {
   Colors,
   Typography,
   Spacing,
   BorderRadius,
 } from '../../shared/theme';
-import HubPresenter from '../presenter/hubPresenter';
 import MapLocationPill from './MapLocationPill';
 
 /**
@@ -14,11 +12,13 @@ import MapLocationPill from './MapLocationPill';
  * Shows visited locations as tappable cards with visit stats.
  * Polyline route replaced by numbered sequence badges.
  *
- * All data read from HubPresenter; no direct Model imports.
+ * Not currently wired in HubScreen; if used, pass props from HubScreen (HubPresenter).
  */
-function MapSection() {
-  const locations = HubPresenter.aggregatedLocationsPlain;
-  const selected = HubPresenter.selectedLocationName;
+function MapSection({
+  aggregatedLocationsPlain: locations,
+  selectedLocationName: selected,
+  onMarkerPress,
+}) {
 
   return (
     <View style={styles.wrapper}>
@@ -39,7 +39,7 @@ function MapSection() {
               key={loc.id}
               activeOpacity={0.7}
               style={[styles.card, isSelected && styles.cardSelected]}
-              onPress={() => HubPresenter.onMarkerPress(loc.name)}
+              onPress={() => onMarkerPress(loc.name)}
             >
               <View style={styles.cardTop}>
                 <View
@@ -180,4 +180,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(MapSection);
+export default MapSection;

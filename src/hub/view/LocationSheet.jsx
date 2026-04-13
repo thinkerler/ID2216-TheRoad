@@ -11,7 +11,6 @@ import {
   Dimensions,
   PanResponder,
 } from 'react-native';
-import { observer } from 'mobx-react-lite';
 import {
   Colors,
   Typography,
@@ -19,7 +18,6 @@ import {
   BorderRadius,
   CommonStyles,
 } from '../../shared/theme';
-import HubPresenter from '../presenter/hubPresenter';
 import ExpenseChart from './ExpenseChart';
 import SheetQuickStat from './SheetQuickStat';
 
@@ -30,10 +28,9 @@ const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
  * Bottom sheet showing details for a selected location.
  * Uses RN Modal + Animated instead of @gorhom/bottom-sheet
  * so it works in Expo Go without native worklets.
+ * Props from HubScreen (HubPresenter).
  */
-function LocationSheet() {
-  const selectedName = HubPresenter.selectedLocationName;
-  const location = HubPresenter.selectedLocationPlain;
+function LocationSheet({ selectedLocationName: selectedName, selectedLocation: location, onSheetDismiss }) {
   const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
   useEffect(() => {
@@ -62,7 +59,7 @@ function LocationSheet() {
             toValue: SHEET_HEIGHT,
             duration: 200,
             useNativeDriver: true,
-          }).start(() => HubPresenter.onSheetDismiss());
+          }).start(() => onSheetDismiss());
         } else {
           Animated.spring(slideAnim, {
             toValue: 0,
@@ -80,9 +77,9 @@ function LocationSheet() {
       visible={!!location}
       transparent
       animationType="none"
-      onRequestClose={HubPresenter.onSheetDismiss}
+      onRequestClose={onSheetDismiss}
     >
-      <TouchableWithoutFeedback onPress={HubPresenter.onSheetDismiss}>
+      <TouchableWithoutFeedback onPress={onSheetDismiss}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
 
@@ -108,7 +105,7 @@ function LocationSheet() {
             </View>
             <TouchableOpacity
               style={styles.closeBtn}
-              onPress={HubPresenter.onSheetDismiss}
+              onPress={onSheetDismiss}
             >
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
@@ -194,4 +191,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(LocationSheet);
+export default LocationSheet;

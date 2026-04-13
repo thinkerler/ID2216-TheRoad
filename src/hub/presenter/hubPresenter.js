@@ -5,9 +5,9 @@ import { AsyncStatus } from '../model/asyncStatus';
 /**
  * Hub presenter — the ONLY bridge between View and Model.
  *
- * Views read data exclusively through these getters and dispatch
- * user actions through the methods below. No View may import
- * hubStore, MobX, or any Model / persistence module directly.
+ * HubScreen (observer) reads from these getters and passes values
+ * into child view components via props. Sub-views must not import
+ * hubStore, MobX, HubPresenter, or any Model / persistence module.
  */
 const HubPresenter = {
 
