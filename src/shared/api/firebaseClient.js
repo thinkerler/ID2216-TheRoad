@@ -1,6 +1,6 @@
 // src/shared/api/firebaseClient.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore, initializeFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,23 +16,15 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Firestore — guard against double-init on Fast Refresh
-let db;
-try {
-  db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
-} catch {
-  db = getFirestore(app);
-}
+// Firestore
+const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+});
 
-// Auth — guard against double-init on Fast Refresh
-let auth;
-try {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-} catch {
-  auth = getAuth(app);
-}
+// Auth with RN persistence
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
 const storage = getStorage(app);
 
