@@ -1,5 +1,6 @@
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -29,6 +30,7 @@ function HubScreen({
   selectedLocationPlain,
   stats,
   onInit,
+  onFocus,
   onMarkerPress,
   onTimeStartChange,
   onTimeEndChange,
@@ -41,6 +43,12 @@ function HubScreen({
   useLayoutEffect(() => {
     onInit();
   }, [onInit]);
+
+  useFocusEffect(
+    useCallback(() => {
+      onFocus();
+    }, [onFocus]),
+  );
 
   return (
     <GestureHandlerRootView style={styles.gestureRoot}>
