@@ -53,10 +53,15 @@ export function JourneysScreen({
   errorMessage,
   createStatus,
   createErrorMessage,
+  placeSuggestions,
+  placeSuggestionsStatus,
+  placeSuggestionsErrorMessage,
   journeys,
   onInit,
   onReload,
   onCreateJourney,
+  onLoadPlaceSuggestions,
+  onClearPlaceSuggestions,
   onResetCreateState,
 }) {
   const router = useRouter();
@@ -77,6 +82,7 @@ export function JourneysScreen({
 
   const openAddModal = () => {
     onResetCreateState();
+    onClearPlaceSuggestions?.();
     setForm(EMPTY_FORM);
     setAddModalVisible(true);
   };
@@ -84,6 +90,7 @@ export function JourneysScreen({
   const closeAddModal = () => {
     if (createStatus === 'loading') return;
     onResetCreateState();
+    onClearPlaceSuggestions?.();
     setAddModalVisible(false);
   };
 
@@ -181,12 +188,18 @@ export function JourneysScreen({
       </Pressable>
 
       <AddJourneyModal
+        key={isAddModalVisible ? 'add-journey-open' : 'add-journey-closed'}
         visible={isAddModalVisible}
         mode="create"
         form={form}
         submitStatus={createStatus}
         submitErrorMessage={createErrorMessage}
+        placeSuggestions={placeSuggestions}
+        placeSuggestionsStatus={placeSuggestionsStatus}
+        placeSuggestionsErrorMessage={placeSuggestionsErrorMessage}
         onChangeField={updateField}
+        onLoadPlaceSuggestions={onLoadPlaceSuggestions}
+        onClearPlaceSuggestions={onClearPlaceSuggestions}
         onPickPhotos={pickPhotosFromAlbum}
         onRemoveLocalPhoto={removeLocalPhotoAt}
         onClose={closeAddModal}

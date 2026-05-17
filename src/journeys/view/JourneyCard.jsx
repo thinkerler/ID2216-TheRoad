@@ -9,10 +9,19 @@ const BAR_PATTERN = [
 ];
 
 function StatBox({ label, value }) {
+  const textValue = String(value ?? '');
+
   return (
     <View style={styles.statBox}>
       <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
+      <Text
+        style={styles.statValue}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.55}
+      >
+        {textValue}
+      </Text>
     </View>
   );
 }
@@ -208,11 +217,12 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: 'rgba(26, 32, 53, 0.92)',
     borderWidth: 1,
     borderColor: Colors.borderSubtle,
     borderRadius: 14,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 7,
   },
   statLabel: {
@@ -221,9 +231,10 @@ const styles = StyleSheet.create({
   },
   statValue: {
     marginTop: 2,
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '600',
     color: Colors.textPrimary,
+    includeFontPadding: false,
   },
   barsRow: {
     marginTop: 10,

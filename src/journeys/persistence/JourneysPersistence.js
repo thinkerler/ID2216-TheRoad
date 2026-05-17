@@ -20,10 +20,17 @@ import { auth, db, storage } from '../../shared/api/firebaseClient';
 import { BgmRecommendationService } from './BgmRecommendationPersistence';
 import { journeysStore } from '../model/JourneysStore';
 import { ProfilePersistence } from '../../profile/persistence/ProfilePersistence';
+import { placesClient } from '../../shared/api/placesClient';
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=1200&h=700&fit=crop';
 const STORAGE_BUCKET = 'the-road-goes-ever-on.firebasestorage.app';
+const PLACE_SUGGESTION_LIMIT = 10;
+const MIN_DATE_YEAR = 1900;
+const MAX_DATE_YEAR = 2100;
+const MAX_TOTAL_SPENT = 9999999;
+const MAX_DAILY_EXPENSE = 999999;
+const MAX_PLACE_COUNT = 500;
 const MONTHS = [
   'Jan',
   'Feb',
@@ -40,10 +47,28 @@ const MONTHS = [
 ];
 
 function parseDateOnly(value) {
-  if (!value) return null;
-  const d = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return null;
-  return d;
+  const text = String(value || '').trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  if (year < MIN_DATE_YEAR || year > MAX_DATE_YEAR) {
+    return null;
+  }
+
+  return date;
 }
 
 function toShortDate(date) {
@@ -103,11 +128,83 @@ function parseListText(input) {
     .filter(Boolean);
 }
 
-function parseListNumber(input) {
-  return parseListText(input)
-    .map((item) => Number(item))
-    .filter((n) => Number.isFinite(n) && n >= 0)
-    .map((n) => Math.round(n));
+function readBoundedMoney(value, label, maxValue, fallback = 0) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    return fallback;
+  }
+
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error(`${label} must be a non-negative number.`);
+  }
+  if (n > maxValue) {
+    throw new Error(`${label} is too high.`);
+  }
+  return Math.round(n);
+}
+
+function readPlaceCount(value, fallback = 0) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    return fallback;
+  }
+
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error('Place count must be a non-negative number.');
+  }
+  if (n > MAX_PLACE_COUNT) {
+    throw new Error('Place count is too high.');
+  }
+  return Math.round(n);
+}
+
+function parseDailyExpenses(input) {
+  const parts = parseListText(input);
+  const values = [];
+
+  for (let i = 0; i < parts.length; i += 1) {
+    const n = Number(parts[i]);
+    if (!Number.isFinite(n) || n < 0) {
+      throw new Error('Daily expenses must be valid non-negative numbers.');
+    }
+    if (n > MAX_DAILY_EXPENSE) {
+      throw new Error('One daily expense is too high.');
+    }
+    values.push(Math.round(n));
+  }
+
+  return values;
+}
+
+function sumExpenses(values) {
+  return values.reduce((sum, item) => sum + item, 0);
+}
+
+function readEnergyLevel(value) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    return 3;
+  }
+
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1 || n > 5) {
+    throw new Error('Energy level must be between 1 and 5.');
+  }
+  return Math.round(n);
+}
+
+function validateDateRange(startDate, endDate) {
+  const start = parseDateOnly(startDate);
+  const end = parseDateOnly(endDate);
+
+  if (!start || !end) {
+    throw new Error('Please choose valid calendar dates between 1900-01-01 and 2100-12-31.');
+  }
+
+  if (end.getTime() < start.getTime()) {
+    throw new Error('End date must be the same day or after start date.');
+  }
+
+  return { start, end };
 }
 
 function buildBgmMatchInput(source) {
@@ -130,6 +227,25 @@ function cleanPhotoUrlList(value) {
   return value
     .map((item) => String(item || '').trim())
     .filter(Boolean);
+}
+
+function cleanSuggestedPlaceName(place) {
+  return String(place?.displayName?.text || '').trim();
+}
+
+function uniqueNames(names) {
+  const seen = new Set();
+  const result = [];
+
+  names.forEach((name) => {
+    const clean = String(name || '').trim();
+    const key = clean.toLowerCase();
+    if (!clean || seen.has(key)) return;
+    seen.add(key);
+    result.push(clean);
+  });
+
+  return result;
 }
 
 async function matchBgmSafe(journeySnapshot) {
@@ -197,7 +313,7 @@ function normalizeJourney(raw, idOverride) {
     imageUrl,
     detailHeroImage,
     visitedLocations: visitedLocations.length ? visitedLocations : [destination],
-    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(1, Math.round(spent))],
+    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(0, Math.round(spent))],
     photoMemories: photoMemories.length ? photoMemories : [imageUrl],
     bgmMoodTags,
     bgmActivityTags,
@@ -225,21 +341,24 @@ function buildCreatePayload(input) {
     throw new Error('Please select at least one photo from album.');
   }
 
-  const start = parseDateOnly(startDate);
-  const end = parseDateOnly(endDate);
-  if (!start || !end || end.getTime() < start.getTime()) {
-    throw new Error('Please provide valid dates. End date must be after start date.');
-  }
+  validateDateRange(startDate, endDate);
 
-  const spent = toNonNegativeNumber(input.spent, 0);
-  const places = toPositiveInt(input.places, 0);
   const visitedLocations = parseListText(input.visitedLocations);
-  const dailyExpenses = parseListNumber(input.dailyExpenses);
+  const places = visitedLocations.length
+    ? readPlaceCount(visitedLocations.length)
+    : readPlaceCount(input.places, 0);
+  const dailyExpenses = parseDailyExpenses(input.dailyExpenses);
+  const spent = dailyExpenses.length
+    ? sumExpenses(dailyExpenses)
+    : readBoundedMoney(input.spent, 'Total spend', MAX_TOTAL_SPENT, 0);
+  if (spent > MAX_TOTAL_SPENT) {
+    throw new Error('Total spend is too high.');
+  }
   const bgmMoodTags = parseListText(input.bgmMoodTags);
   const bgmActivityTags = parseListText(input.bgmActivityTags);
   const bgmPreferredGenres = parseListText(input.bgmPreferredGenres);
   const bgmCustomKeywords = parseListText(input.bgmCustomKeywords);
-  const bgmEnergyLevel = clampBgmEnergyLevel(input.bgmEnergyLevel, 3);
+  const bgmEnergyLevel = readEnergyLevel(input.bgmEnergyLevel);
 
   return {
     destination,
@@ -249,10 +368,10 @@ function buildCreatePayload(input) {
     travelDates: formatTravelDates(startDate, endDate),
     durationLabel: `${durationDays(startDate, endDate)} Days`,
     spent,
-    places,
+    places: places || (visitedLocations.length ? visitedLocations.length : 1),
     localPhotoUris,
     visitedLocations: visitedLocations.length ? visitedLocations : [destination],
-    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(1, Math.round(spent))],
+    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(0, Math.round(spent))],
     bgmMoodTags,
     bgmActivityTags,
     bgmPreferredGenres,
@@ -282,21 +401,24 @@ function buildUpdatePayload(input) {
     throw new Error('Please keep or select at least one photo.');
   }
 
-  const start = parseDateOnly(startDate);
-  const end = parseDateOnly(endDate);
-  if (!start || !end || end.getTime() < start.getTime()) {
-    throw new Error('Please provide valid dates. End date must be after start date.');
-  }
+  validateDateRange(startDate, endDate);
 
-  const spent = toNonNegativeNumber(input.spent, 0);
-  const places = toPositiveInt(input.places, 0);
   const visitedLocations = parseListText(input.visitedLocations);
-  const dailyExpenses = parseListNumber(input.dailyExpenses);
+  const places = visitedLocations.length
+    ? readPlaceCount(visitedLocations.length)
+    : readPlaceCount(input.places, 0);
+  const dailyExpenses = parseDailyExpenses(input.dailyExpenses);
+  const spent = dailyExpenses.length
+    ? sumExpenses(dailyExpenses)
+    : readBoundedMoney(input.spent, 'Total spend', MAX_TOTAL_SPENT, 0);
+  if (spent > MAX_TOTAL_SPENT) {
+    throw new Error('Total spend is too high.');
+  }
   const bgmMoodTags = parseListText(input.bgmMoodTags);
   const bgmActivityTags = parseListText(input.bgmActivityTags);
   const bgmPreferredGenres = parseListText(input.bgmPreferredGenres);
   const bgmCustomKeywords = parseListText(input.bgmCustomKeywords);
-  const bgmEnergyLevel = clampBgmEnergyLevel(input.bgmEnergyLevel, 3);
+  const bgmEnergyLevel = readEnergyLevel(input.bgmEnergyLevel);
 
   return {
     id: journeyId,
@@ -307,11 +429,11 @@ function buildUpdatePayload(input) {
     travelDates: formatTravelDates(startDate, endDate),
     durationLabel: `${durationDays(startDate, endDate)} Days`,
     spent,
-    places,
+    places: places || (visitedLocations.length ? visitedLocations.length : 1),
     existingPhotoUrls,
     localPhotoUris,
     visitedLocations: visitedLocations.length ? visitedLocations : [destination],
-    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(1, Math.round(spent))],
+    dailyExpenses: dailyExpenses.length ? dailyExpenses : [Math.max(0, Math.round(spent))],
     bgmMoodTags,
     bgmActivityTags,
     bgmPreferredGenres,
@@ -436,12 +558,45 @@ export const JourneysPersistence = {
     }
   },
 
+  async loadPlaceSuggestions(destination, country) {
+    const city = String(destination || '').trim();
+    const nation = String(country || '').trim();
+
+    if (!city) {
+      journeysStore.clearPlaceSuggestions();
+      return;
+    }
+
+    journeysStore.setPlaceSuggestionsStarted();
+
+    try {
+      const places = await this.fetchPlaceSuggestions(city, nation);
+      journeysStore.setPlaceSuggestionsLoaded(places);
+    } catch (e) {
+      journeysStore.setPlaceSuggestionsError(e.message || 'Failed to load place suggestions');
+    }
+  },
+
+  clearPlaceSuggestions() {
+    journeysStore.clearPlaceSuggestions();
+  },
+
   async fetchJourneys() {
     const resolvedUid = await ensureUid();
     const snap = await getDocs(
       query(journeysRef(resolvedUid), orderBy('createdAt', 'desc')),
     );
     return snap.docs.map((d) => normalizeJourney(d.data(), d.id));
+  },
+
+  async fetchPlaceSuggestions(destination, country) {
+    const city = String(destination || '').trim();
+    const nation = String(country || '').trim();
+    const locationText = nation ? `${city}, ${nation}` : city;
+    const queryText = `top tourist attractions and landmarks in ${locationText}`;
+    const places = await placesClient.searchPlaceNames(queryText, PLACE_SUGGESTION_LIMIT);
+    const names = places.map((place) => cleanSuggestedPlaceName(place));
+    return uniqueNames(names).slice(0, PLACE_SUGGESTION_LIMIT);
   },
 
   async createJourney(input) {

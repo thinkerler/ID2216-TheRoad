@@ -17,6 +17,14 @@ const JourneysPresenter = {
     JourneysPersistence.saveNewJourney(input);
   },
 
+  onLoadPlaceSuggestions(destination, country) {
+    JourneysPersistence.loadPlaceSuggestions(destination, country);
+  },
+
+  onClearPlaceSuggestions() {
+    JourneysPersistence.clearPlaceSuggestions();
+  },
+
   resetCreateState() {
     journeysStore.resetCreateState();
   },
@@ -37,6 +45,18 @@ const JourneysPresenter = {
     return journeysStore.createErrorMessage;
   },
 
+  getPlaceSuggestions() {
+    return journeysStore.placeSuggestions.slice();
+  },
+
+  getPlaceSuggestionsStatus() {
+    return journeysStore.placeSuggestionsStatus;
+  },
+
+  getPlaceSuggestionsErrorMessage() {
+    return journeysStore.placeSuggestionsErrorMessage;
+  },
+
   getJourneys() {
     return journeysStore.journeys.map((item) => ({
       ...item,
@@ -49,6 +69,9 @@ const journeysPresenterProps = {
   onInit: () => JourneysPresenter.init(),
   onReload: () => JourneysPresenter.reload(),
   onCreateJourney: (input) => JourneysPresenter.onCreateJourney(input),
+  onLoadPlaceSuggestions: (destination, country) =>
+    JourneysPresenter.onLoadPlaceSuggestions(destination, country),
+  onClearPlaceSuggestions: () => JourneysPresenter.onClearPlaceSuggestions(),
   onResetCreateState: () => JourneysPresenter.resetCreateState(),
 };
 
@@ -58,6 +81,9 @@ function JourneysPresenterView() {
     errorMessage: JourneysPresenter.getErrorMessage(),
     createStatus: JourneysPresenter.getCreateStatus(),
     createErrorMessage: JourneysPresenter.getCreateErrorMessage(),
+    placeSuggestions: JourneysPresenter.getPlaceSuggestions(),
+    placeSuggestionsStatus: JourneysPresenter.getPlaceSuggestionsStatus(),
+    placeSuggestionsErrorMessage: JourneysPresenter.getPlaceSuggestionsErrorMessage(),
     journeys: JourneysPresenter.getJourneys(),
     ...journeysPresenterProps,
   };

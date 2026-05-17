@@ -18,6 +18,14 @@ const JourneyDetailPresenter = {
     JourneysPersistence.saveJourneyUpdate(input);
   },
 
+  onLoadPlaceSuggestions(destination, country) {
+    JourneysPersistence.loadPlaceSuggestions(destination, country);
+  },
+
+  onClearPlaceSuggestions() {
+    JourneysPersistence.clearPlaceSuggestions();
+  },
+
   ensureBgmTrack(journeyId) {
     JourneysPersistence.loadBgmTrack(journeyId);
   },
@@ -42,6 +50,18 @@ const JourneyDetailPresenter = {
     return journeysStore.updateErrorMessage;
   },
 
+  getPlaceSuggestions() {
+    return journeysStore.placeSuggestions.slice();
+  },
+
+  getPlaceSuggestionsStatus() {
+    return journeysStore.placeSuggestionsStatus;
+  },
+
+  getPlaceSuggestionsErrorMessage() {
+    return journeysStore.placeSuggestionsErrorMessage;
+  },
+
   getJourneyById(journeyId) {
     if (!journeyId) return null;
     const targetId = String(journeyId);
@@ -59,6 +79,9 @@ const journeyDetailPresenterProps = {
   onInit: () => JourneyDetailPresenter.init(),
   onReload: () => JourneyDetailPresenter.reload(),
   onUpdateJourney: (input) => JourneyDetailPresenter.onUpdateJourney(input),
+  onLoadPlaceSuggestions: (destination, country) =>
+    JourneyDetailPresenter.onLoadPlaceSuggestions(destination, country),
+  onClearPlaceSuggestions: () => JourneyDetailPresenter.onClearPlaceSuggestions(),
   onEnsureBgmTrack: (journeyId) => JourneyDetailPresenter.ensureBgmTrack(journeyId),
   onPlayBgm: (previewUrl, volume) =>
     JourneyPlaybackPersistence.playBgm(previewUrl, volume),
@@ -73,6 +96,9 @@ function JourneyDetailPresenterView() {
     errorMessage: JourneyDetailPresenter.getErrorMessage(),
     updateStatus: JourneyDetailPresenter.getUpdateStatus(),
     updateErrorMessage: JourneyDetailPresenter.getUpdateErrorMessage(),
+    placeSuggestions: JourneyDetailPresenter.getPlaceSuggestions(),
+    placeSuggestionsStatus: JourneyDetailPresenter.getPlaceSuggestionsStatus(),
+    placeSuggestionsErrorMessage: JourneyDetailPresenter.getPlaceSuggestionsErrorMessage(),
     getJourneyById: (journeyId) => JourneyDetailPresenter.getJourneyById(journeyId),
     ...journeyDetailPresenterProps,
   };
