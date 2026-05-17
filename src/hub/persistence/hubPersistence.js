@@ -27,10 +27,17 @@ function journeysRef(uid) {
  * No demo fallback: Hub reads Firebase only.
  */
 const HubPersistence = {
+  isRefreshing: false,
+
   ensureLoaded() {
     if (hubStore.loadStatus === 'idle') {
       this.loadTrips();
     }
+  },
+
+  refreshTrips() {
+    if (this.isRefreshing) return;
+    this.loadTrips();
   },
 
   retry() {
@@ -38,12 +45,15 @@ const HubPersistence = {
   },
 
   async loadTrips() {
+    this.isRefreshing = true;
     hubStore.setLoadStarted();
     try {
       const data = await this.fetchTrips();
       hubStore.setTripsLoaded(data);
     } catch (err) {
       hubStore.setLoadError(err?.message || 'Failed to load trips');
+    } finally {
+      this.isRefreshing = false;
     }
   },
 
