@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     width: 130,
+    height: 168,
   },
   image: {
     width: 130,
