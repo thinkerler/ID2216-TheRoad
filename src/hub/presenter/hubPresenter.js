@@ -100,6 +100,10 @@ const HubPresenter = {
   onRetry() {
     HubPersistence.retry();
   },
+
+  onFocus() {
+    HubPersistence.refreshTrips();
+  },
 };
 
 function HubPresenterView() {
@@ -118,6 +122,7 @@ function HubPresenterView() {
     selectedLocationPlain: HubPresenter.selectedLocationPlain,
     stats: HubPresenter.stats,
     onInit: hubPresenterProps.onInit,
+    onFocus: hubPresenterProps.onFocus,
     onMarkerPress: HubPresenter.onMarkerPress,
     onTimeStartChange: HubPresenter.onTimeStartChange,
     onTimeEndChange: HubPresenter.onTimeEndChange,
@@ -131,6 +136,7 @@ function HubPresenterView() {
 
 const hubPresenterProps = {
   onInit: () => HubPersistence.ensureLoaded(),
+  onFocus: () => HubPresenter.onFocus(),
   onRetry: () => HubPresenter.onRetry(),
 };
 
