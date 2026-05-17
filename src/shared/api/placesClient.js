@@ -24,6 +24,11 @@ const TEXT_SEARCH_FIELDS = [
   'places.editorialSummary',
 ].join(',');
 
+const PLACE_SUGGESTION_FIELDS = [
+  'places.id',
+  'places.displayName',
+].join(',');
+
 const DETAIL_FIELDS = [
   'id',
   'displayName',
@@ -68,14 +73,29 @@ export const placesClient = {
     return data.places ?? [];
   },
 
-  async searchByQuery(textQuery) {
+  async searchByQuery(textQuery, maxResultCount = 5) {
     const res = await fetch(`${BASE}/places:searchText`, {
       method: 'POST',
       headers: headers(TEXT_SEARCH_FIELDS),
       body: JSON.stringify({
         textQuery,
         languageCode: 'en',
-        maxResultCount: 5,
+        maxResultCount,
+      }),
+    });
+    const data = await handleResponse(res);
+    return data.places ?? [];
+  },
+
+  async searchPlaceNames(textQuery, maxResultCount = 10) {
+    if (!API_KEY?.trim()) return [];
+    const res = await fetch(`${BASE}/places:searchText`, {
+      method: 'POST',
+      headers: headers(PLACE_SUGGESTION_FIELDS),
+      body: JSON.stringify({
+        textQuery,
+        languageCode: 'en',
+        maxResultCount,
       }),
     });
     const data = await handleResponse(res);
