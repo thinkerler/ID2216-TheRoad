@@ -22,6 +22,7 @@ android
 *.key
 *.mobileprovision
 *.md
+!README.md
 
 # Metro
 .metro-health-check*
