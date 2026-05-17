@@ -21,6 +21,7 @@ android
 *.p12
 *.key
 *.mobileprovision
+*.md
 
 # Metro
 .metro-health-check*

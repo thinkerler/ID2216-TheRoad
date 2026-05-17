@@ -79,7 +79,7 @@ function resolveImageMediaTypes() {
 }
 
 function DailyExpenseBars({ values }) {
-  const max = values.length > 0 ? Math.max(...values) : 1;
+  const max = values.length > 0 ? Math.max(...values, 1) : 1;
 
   return (
     <View style={styles.chartRow}>
@@ -107,10 +107,15 @@ export function JourneyDetailScreen({
   errorMessage,
   updateStatus,
   updateErrorMessage,
+  placeSuggestions,
+  placeSuggestionsStatus,
+  placeSuggestionsErrorMessage,
   getJourneyById,
   onInit,
   onReload,
   onUpdateJourney,
+  onLoadPlaceSuggestions,
+  onClearPlaceSuggestions,
   onEnsureBgmTrack,
   onPlayBgm,
   onPauseBgm,
@@ -335,6 +340,7 @@ export function JourneyDetailScreen({
   const openEditModal = () => {
     if (!journey) return;
     onResetUpdateState();
+    onClearPlaceSuggestions?.();
     setEditForm(createEditForm(journey));
     setEditModalVisible(true);
   };
@@ -342,6 +348,7 @@ export function JourneyDetailScreen({
   const closeEditModal = () => {
     if (updateStatus === 'loading') return;
     onResetUpdateState();
+    onClearPlaceSuggestions?.();
     setEditModalVisible(false);
   };
 
@@ -620,12 +627,18 @@ export function JourneyDetailScreen({
       </Modal>
 
       <AddJourneyModal
+        key={isEditModalVisible ? `edit-${journey?.id || 'journey'}` : 'edit-closed'}
         visible={isEditModalVisible}
         mode="edit"
         form={editForm}
         submitStatus={updateStatus}
         submitErrorMessage={updateErrorMessage}
+        placeSuggestions={placeSuggestions}
+        placeSuggestionsStatus={placeSuggestionsStatus}
+        placeSuggestionsErrorMessage={placeSuggestionsErrorMessage}
         onChangeField={updateEditField}
+        onLoadPlaceSuggestions={onLoadPlaceSuggestions}
+        onClearPlaceSuggestions={onClearPlaceSuggestions}
         onPickPhotos={pickEditPhotosFromAlbum}
         onRemoveExistingPhoto={removeExistingPhotoAt}
         onRemoveLocalPhoto={removeLocalPhotoAt}

@@ -17,6 +17,12 @@ class JourneysStoreClass {
 
   bgmMatchInFlight = {};
 
+  placeSuggestions = [];
+
+  placeSuggestionsStatus = 'idle';
+
+  placeSuggestionsErrorMessage = null;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -79,6 +85,27 @@ class JourneysStoreClass {
     } else {
       delete this.bgmMatchInFlight[targetId];
     }
+  }
+
+  setPlaceSuggestionsStarted() {
+    this.placeSuggestionsStatus = 'loading';
+    this.placeSuggestionsErrorMessage = null;
+  }
+
+  setPlaceSuggestionsLoaded(data) {
+    this.placeSuggestions = data;
+    this.placeSuggestionsStatus = 'success';
+  }
+
+  setPlaceSuggestionsError(message) {
+    this.placeSuggestionsStatus = 'error';
+    this.placeSuggestionsErrorMessage = message;
+  }
+
+  clearPlaceSuggestions() {
+    this.placeSuggestions = [];
+    this.placeSuggestionsStatus = 'idle';
+    this.placeSuggestionsErrorMessage = null;
   }
 
   resetUpdateState() {
